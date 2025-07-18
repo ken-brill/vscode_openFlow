@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Flow in Flow Builder",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/.vscode/scripts/openFlow.js"
+      ],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "options": {
+        "env": {
+          "VSCODE_FILE": "${file}"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}
+
