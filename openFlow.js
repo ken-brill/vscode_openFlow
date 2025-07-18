@@ -20,7 +20,7 @@ try {
   }
 
   // Query for Draft Flow record
-  const query = `sfdx force:data:soql:query -q "SELECT Id FROM Flow WHERE Status = 'Draft' AND Definition.DeveloperName = '${flowApiName}'" -t --json`;
+  const query = `sfdx force:data:soql:query -q "SELECT Id FROM Flow WHERE Status <> 'Obsolete' AND Definition.DeveloperName = '${flowApiName}'" -t --json`;
   const result = execSync(query, { encoding: 'utf8' });
   const json = JSON.parse(result);
   const records = json.result.records;
