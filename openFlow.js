@@ -19,7 +19,7 @@ try {
     process.exit(1);
   }
 
-  // Query for Draft Flow record
+  // Query for Active or Draft Flow record
   const query = `sfdx force:data:soql:query -q "SELECT Id FROM Flow WHERE Status <> 'Obsolete' AND Definition.DeveloperName = '${flowApiName}' ORDER BY Status ASC LIMIT 1" -t --json`;
   const result = execSync(query, { encoding: 'utf8' });
   const json = JSON.parse(result);
