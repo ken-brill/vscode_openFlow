@@ -1,5 +1,4 @@
 const { execSync, exec } = require('child_process');
-
 const filePath = process.env.VSCODE_FILE;
 
 if (!filePath || !filePath.endsWith('.flow-meta.xml')) {
