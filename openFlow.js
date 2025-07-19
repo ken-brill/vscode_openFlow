@@ -1,4 +1,5 @@
-const { execSync, exec } = require('child_process');
+const { spawn } = require('child_process');
+const keyword = 'force-app';
 const filePath = process.env.VSCODE_FILE;
 
 if (!filePath || !filePath.endsWith('.flow-meta.xml')) {
@@ -6,53 +7,26 @@ if (!filePath || !filePath.endsWith('.flow-meta.xml')) {
   process.exit(1);
 }
 
-const flowApiName = filePath.split('/').pop().replace('.flow-meta.xml', '');
+console.log(`🔗 ${filePath}`);
+const index = filePath.indexOf(keyword);
+const flowApiName = index !== -1 ? filePath.slice(index) : filePath;
+console.log(`🔗 ${flowApiName}`);
 
 try {
-  // Get default org domain
-  const orgDisplay = execSync(`sfdx force:org:display --json`, { encoding: 'utf8' });
-  const orgJson = JSON.parse(orgDisplay);
-  const domain = orgJson.result.instanceUrl;
-
-  if (!domain) {
-    console.error('❌ Could not determine Salesforce org domain.');
-    process.exit(1);
-  }
-
-  // Query for Active or Draft Flow record
-  const query = `sfdx force:data:soql:query -q "SELECT Id FROM Flow WHERE Status <> 'Obsolete' AND Definition.DeveloperName = '${flowApiName}' ORDER BY Status ASC LIMIT 1" -t --json`;
-  const result = execSync(query, { encoding: 'utf8' });
-  const json = JSON.parse(result);
-  const records = json.result.records;
-
-  if (!records.length) {
-    console.error(`❌ No Draft Flow found with API Name: ${flowApiName}`);
-    console.log(`🔗 ${query}`);
-    process.exit(1);
-  }
-
-  const flowId = records[0].Id;
-  const flowBuilderUrl = `${domain}/builder_platform_interaction/flowBuilder.app?flowId=${flowId}`;
-
   console.log(`🌐 Opening Flow Builder for "${flowApiName}"`);
-  console.log(`🔗 ${flowBuilderUrl}`);
 
-  // Open browser (cross-platform)
-  const platform = process.platform;
-  let command = '';
+  const command = spawn('sf', ['org', 'open', '--source-file', flowApiName]);
 
-  if (platform === 'darwin') {
-    command = `open "${flowBuilderUrl}"`;
-  } else if (platform === 'win32') {
-    command = `start "" "${flowBuilderUrl}"`;
-  } else {
-    command = `xdg-open "${flowBuilderUrl}"`;
-  }
+  command.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+  });
 
-  exec(command, (error) => {
-    if (error) {
-      console.error('❌ Failed to open browser:', error);
-    }
+  command.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+  });
+
+  command.on('close', (code) => {
+    console.log(`child process exited with code ${code}`);
   });
 
 } catch (error) {
